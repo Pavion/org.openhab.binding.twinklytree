@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<thing:thing-descriptions bindingId="twinklytree"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:thing="https://openhab.org/schemas/thing-description/v1.0.0"
+	xsi:schemaLocation="https://openhab.org/schemas/thing-description/v1.0.0 https://openhab.org/schemas/thing-description-1.0.0.xsd">
+
+	<thing-type id="twinkly">
+		<label>Twinkly</label>
+		<description>Twinkly christmas tree LED lights</description>
+
+		<channels>
+			<channel id="switch" typeId="switch"/>
+			<channel id="dimmer" typeId="dimmer"/>
+		</channels>
+
+		<config-description>
+			<parameter name="host" type="text" required="true">
+				<label>Hostname or IP address</label>
+				<description>The host name or IP address for your twinkly device</description>
+			</parameter>
+		</config-description>
+
+	</thing-type>
+
+	<channel-type id="switch">
+		<item-type>Switch</item-type>
+		<label>On/off switch</label>
+		<description>On/off switch</description>
+	</channel-type>
+	<channel-type id="dimmer">
+		<item-type>Dimmer</item-type>
+		<label>Brightness</label>
+		<description>Control the brightness</description>
+	</channel-type>
+</thing:thing-descriptions>
