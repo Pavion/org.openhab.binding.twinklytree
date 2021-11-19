@@ -6,7 +6,7 @@
 
 	<thing-type id="twinkly">
 		<label>Twinkly</label>
-		<description>Twinkly christmas tree LED lights</description>
+		<description>Twinkly LED lights</description>
 
 		<channels>
 			<channel id="switch" typeId="switch"/>
@@ -16,7 +16,7 @@
 		<config-description>
 			<parameter name="host" type="text" required="true">
 				<label>Hostname or IP address</label>
-				<description>The host name or IP address for your twinkly device</description>
+				<description>The host name or IP address for your Twinkly device</description>
 			</parameter>
 		</config-description>
 
@@ -30,6 +30,6 @@
 	<channel-type id="dimmer">
 		<item-type>Dimmer</item-type>
 		<label>Brightness</label>
-		<description>Control the brightness</description>
+		<description>Brightness control</description>
 	</channel-type>
 </thing:thing-descriptions>

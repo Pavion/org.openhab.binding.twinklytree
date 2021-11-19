@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2020 Contributors to the openHAB project
+ * Copyright (c) 2010-2021 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -13,13 +13,14 @@
 package org.openhab.binding.twinklytree.internal;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
-import org.eclipse.smarthome.core.thing.ThingTypeUID;
+import org.openhab.core.thing.ThingTypeUID;
 
 /**
  * The {@link TwinklyTreeBindingConstants} class defines common constants, which are
  * used across the whole binding.
  *
  * @author Maarten van Hulsentop - Initial contribution
+ * @author Pavion - Refactoring for OH3
  */
 @NonNullByDefault
 public class TwinklyTreeBindingConstants {
