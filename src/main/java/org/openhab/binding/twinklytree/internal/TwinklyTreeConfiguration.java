@@ -29,6 +29,7 @@ public class TwinklyTreeConfiguration {
      * Sample configuration parameter. Replace with your own.
      */
     public String host;
+    public Integer refresh;
     protected @Nullable String token;
     protected Date tokenExpiryDate = new Date();
 

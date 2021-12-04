@@ -16,7 +16,10 @@ _To start with the binding, put the jar in the add-ons directory and start addin
 
 ## Thing Configuration
 
-_You need to manually specify the IP address of the Twinkly controller_
+| parameter     | type   | description                                       |
+|---------------|--------|---------------------------------------------------|
+| host          | String | IP or hostname of your device                     |
+| refresh       | Number | Refresh rate in seconds (default 0 to disable)    |
 
 ## Channels
 
@@ -33,7 +36,7 @@ _You need to manually specify the IP address of the Twinkly controller_
 ### .things
 
 ```
-Thing twinklytree:twinkly:twinklyTree "Twinkly Tree" @ "MyRoom" [ host="192.168.0.2" ]
+Thing twinklytree:twinkly:twinklyTree "Twinkly Tree" @ "MyRoom" [ host="192.168.0.2", refresh="60" ]
 ```
 
 ### .items (with Alexa support)

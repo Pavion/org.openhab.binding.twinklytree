@@ -21,6 +21,12 @@
 				<label>Hostname or IP address</label>
 				<description>The host name or IP address for your Twinkly device</description>
 			</parameter>
+			<parameter name="refresh" type="integer">
+				<required>false</required>
+				<default>0</default>
+				<label>Refresh rate (0 to disable)</label>
+				<description>The refresh rate in seconds. Default 0 to disable refresh, please don't set too low.</description>
+			</parameter>
 		</config-description>
 
 	</thing-type>

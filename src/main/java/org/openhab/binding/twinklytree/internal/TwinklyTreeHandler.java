@@ -224,7 +224,14 @@ public class TwinklyTreeHandler extends BaseThingHandler {
         // Example for background initialization:
         // scheduler.execute(() -> {
         // login();
-        pollingJob = scheduler.scheduleWithFixedDelay(this::refreshState, 0, 1, TimeUnit.MINUTES);
+        Integer refreshRate = 0;
+        if (config.refresh != null) {
+            refreshRate = config.refresh;
+        }
+        if (refreshRate > 0) {
+            logger.debug("Starting refresh job with {} refresh rate", refreshRate);
+            pollingJob = scheduler.scheduleWithFixedDelay(this::refreshState, 0, refreshRate, TimeUnit.SECONDS);
+        }
         // if (token != null) {
         // updateStatus(ThingStatus.ONLINE);
         // } else {
@@ -243,7 +250,9 @@ public class TwinklyTreeHandler extends BaseThingHandler {
 
     private void refreshState() {
         for (Channel channel : this.getThing().getChannels()) {
-            handleCommand(channel.getUID(), RefreshType.REFRESH);
+            if (isLinked(channel.getUID())) {
+                handleCommand(channel.getUID(), RefreshType.REFRESH);
+            }
         }
         /*
          *
