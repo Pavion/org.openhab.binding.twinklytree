@@ -32,6 +32,7 @@ import java.util.concurrent.TimeUnit;
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.json.JSONObject;
+import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.StringType;
@@ -70,40 +71,51 @@ public class TwinklyTreeHandler extends BaseThingHandler {
         logger.debug("Handle command {} with channel {}", command, channelUID);
         try {
             refreshIfNeeded();
-            if (CHANNEL_SWITCH.equals(channelUID.getId())) {
-                if (command instanceof RefreshType) {
-                    updateState(channelUID, isOn() ? OnOffType.ON : OnOffType.OFF);
-
-                    return;
-                }
-
-                if (OnOffType.OFF.equals(command)) {
-                    setMode("off");
-                    updateState(channelUID, OnOffType.OFF);
-                } else if (OnOffType.ON.equals(command)) {
-                    setMode("movie");
-                    updateState(channelUID, OnOffType.ON);
-                } else {
-                    logger.warn("Unexpected command for Twinkly: {}", command);
-                }
-            } else if (CHANNEL_DIMMER.equals(channelUID.getId())) {
-                if (command instanceof RefreshType) {
-                    if (isOn()) {
-                        updateState(channelUID, new PercentType(getBrightness()));
+            switch (channelUID.getId()) {
+                case CHANNEL_SWITCH:
+                    if (command instanceof RefreshType) {
+                        updateState(channelUID, isOn() ? OnOffType.ON : OnOffType.OFF);
                     } else {
-                        updateState(channelUID, PercentType.ZERO);
+                        if (OnOffType.OFF.equals(command)) {
+                            setMode("off");
+                            updateState(channelUID, OnOffType.OFF);
+                        } else if (OnOffType.ON.equals(command)) {
+                            setMode("movie");
+                            updateState(channelUID, OnOffType.ON);
+                        } else {
+                            logger.warn("Unexpected command for Twinkly: {}", command);
+                        }
                     }
-                    return;
-                }
-                PercentType type = (PercentType) command;
-                setBrightness(type.intValue());
-            } else if (CHANNEL_MODE.equals(channelUID.getId())) {
-                if (command instanceof RefreshType) {
-                    updateState(channelUID, new StringType(getMode()));
-                } else {
-                    setMode(command.toFullString());
-                }
+                    break;
+                case CHANNEL_DIMMER:
+                    if (command instanceof RefreshType) {
+                        if (isOn()) {
+                            updateState(channelUID, new PercentType(getBrightness()));
+                        } else {
+                            updateState(channelUID, PercentType.ZERO);
+                        }
+                    } else {
+                        PercentType type = (PercentType) command;
+                        setBrightness(type.intValue());
+                    }
+                    break;
+                case CHANNEL_MODE:
+                    if (command instanceof RefreshType) {
+                        updateState(channelUID, new StringType(getMode()));
+                    } else {
+                        setMode(command.toFullString());
+                    }
+                    break;
+                case CHANNEL_CURRENT_EFFECT:
+                    if (command instanceof RefreshType) {
+                        updateState(channelUID, new DecimalType(getCurrentEffect()));
+                    } else {
+                        DecimalType type = (DecimalType) command;
+                        setCurrentEffect(type.intValue());
+                    }
+                    break;
             }
+
         } catch (IOException e) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
                     "Could not control device at IP address " + config.host);
@@ -137,6 +149,21 @@ public class TwinklyTreeHandler extends BaseThingHandler {
     private void setMode(String newMode) throws IOException, ProtocolException, MalformedURLException {
         JSONObject setModeResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/mode"), "POST",
                 "{\"mode\":\"" + newMode + "\"}", config.token);
+    }
+
+    private int getCurrentEffect() throws IOException, ProtocolException, MalformedURLException {
+        JSONObject getModeResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/effects/current"), "GET",
+                null, config.token);
+        if (getModeResponse.has("preset_id")) {
+            return getModeResponse.getInt("preset_id");
+        } else {
+            return getModeResponse.getInt("effect_id");
+        }
+    }
+
+    private void setCurrentEffect(int currentEffect) throws IOException, ProtocolException, MalformedURLException {
+        JSONObject setModeResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/effects/current"), "POST",
+                "{\"preset_id\":\"" + currentEffect + "\",\"effect_id\":\"" + currentEffect + "\"}", config.token);
     }
 
     private void logout() {

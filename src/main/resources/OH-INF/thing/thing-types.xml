@@ -12,6 +12,7 @@
 			<channel id="switch" typeId="switch"/>
 			<channel id="dimmer" typeId="dimmer"/>
 			<channel id="mode" typeId="mode"/>
+			<channel id="currenteffect" typeId="currenteffect"/>
 		</channels>
 
 		<config-description>
@@ -48,5 +49,10 @@
 		<item-type>Dimmer</item-type>
 		<label>Brightness</label>
 		<description>Brightness control</description>
+	</channel-type>
+	<channel-type id="currenteffect">
+		<item-type>Number</item-type>
+		<label>Current Effect</label>
+		<description>Current effect in effect mode</description>
 	</channel-type>
 </thing:thing-descriptions>

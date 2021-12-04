@@ -34,6 +34,7 @@ public class TwinklyTreeBindingConstants {
     public static final String CHANNEL_SWITCH = "switch";
     public static final String CHANNEL_DIMMER = "dimmer";
     public static final String CHANNEL_MODE = "mode";
+    public static final String CHANNEL_CURRENT_EFFECT = "currenteffect";
 
     public static final String MODE_OFF = "off";
     public static final String MODE_COLOR = "color";
