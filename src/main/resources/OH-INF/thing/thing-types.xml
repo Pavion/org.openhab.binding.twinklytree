@@ -13,6 +13,7 @@
 			<channel id="dimmer" typeId="dimmer"/>
 			<channel id="mode" typeId="mode"/>
 			<channel id="currenteffect" typeId="currenteffect"/>
+			<channel id="currentmovie" typeId="currentmovie"/>
 		</channels>
 
 		<config-description>
@@ -54,5 +55,10 @@
 		<item-type>Number</item-type>
 		<label>Current Effect</label>
 		<description>Current effect in effect mode</description>
+	</channel-type>
+	<channel-type id="currentmovie">
+		<item-type>Number</item-type>
+		<label>Current Movie</label>
+		<description>Current movie in movie mode</description>
 	</channel-type>
 </thing:thing-descriptions>

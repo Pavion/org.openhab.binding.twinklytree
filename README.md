@@ -26,6 +26,7 @@ _You need to manually specify the IP address of the Twinkly controller_
 | brightness    | Dimmer | Adjust brightness                         |
 | mode          | String | Set current mode                          |
 | currenteffect | Number | Set current effect for effect mode        |
+| currentmovie  | Number | Set current movie for movie mode          |
 
 ## Textual configuration example
 

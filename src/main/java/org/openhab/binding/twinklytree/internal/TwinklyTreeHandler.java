@@ -36,6 +36,7 @@ import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.StringType;
+import org.openhab.core.thing.Channel;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
@@ -100,7 +101,7 @@ public class TwinklyTreeHandler extends BaseThingHandler {
                     }
                     break;
                 case CHANNEL_MODE:
-                    if (command instanceof RefreshType) {
+                    if (command instanceof RefreshType || command.toFullString().toUpperCase().equals("REFRESH")) {
                         updateState(channelUID, new StringType(getMode()));
                     } else {
                         setMode(command.toFullString());
@@ -114,12 +115,19 @@ public class TwinklyTreeHandler extends BaseThingHandler {
                         setCurrentEffect(type.intValue());
                     }
                     break;
+                case CHANNEL_CURRENT_MOVIE:
+                    if (command instanceof RefreshType) {
+                        updateState(channelUID, new DecimalType(getCurrentMovie()));
+                    } else {
+                        DecimalType type = (DecimalType) command;
+                        setCurrentMovie(type.intValue());
+                    }
+                    break;
             }
-
         } catch (IOException e) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
                     "Could not control device at IP address " + config.host);
-            logger.error("Error communicating with Twinkly", e);
+            logger.error("Error communicating with Twinkly"/* , e */);
             config.token = null;
         }
     }
@@ -152,18 +160,29 @@ public class TwinklyTreeHandler extends BaseThingHandler {
     }
 
     private int getCurrentEffect() throws IOException, ProtocolException, MalformedURLException {
-        JSONObject getModeResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/effects/current"), "GET",
-                null, config.token);
-        if (getModeResponse.has("preset_id")) {
-            return getModeResponse.getInt("preset_id");
+        JSONObject response = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/effects/current"), "GET", null,
+                config.token);
+        if (response.has("preset_id")) {
+            return response.getInt("preset_id");
         } else {
-            return getModeResponse.getInt("effect_id");
+            return response.getInt("effect_id");
         }
     }
 
     private void setCurrentEffect(int currentEffect) throws IOException, ProtocolException, MalformedURLException {
-        JSONObject setModeResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/effects/current"), "POST",
+        JSONObject response = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/effects/current"), "POST",
                 "{\"preset_id\":\"" + currentEffect + "\",\"effect_id\":\"" + currentEffect + "\"}", config.token);
+    }
+
+    private int getCurrentMovie() throws IOException, ProtocolException, MalformedURLException {
+        JSONObject response = sendRequest(new URL(config.getBaseURL(), "/xled/v1/movies/current"), "GET", null,
+                config.token);
+        return response.getInt("id");
+    }
+
+    private void setCurrentMovie(int currentMovie) throws IOException, ProtocolException, MalformedURLException {
+        JSONObject response = sendRequest(new URL(config.getBaseURL(), "/xled/v1/movies/current"), "POST",
+                "{\"id\":" + currentMovie + "}", config.token);
     }
 
     private void logout() {
@@ -205,7 +224,7 @@ public class TwinklyTreeHandler extends BaseThingHandler {
         // Example for background initialization:
         // scheduler.execute(() -> {
         // login();
-        pollingJob = scheduler.scheduleWithFixedDelay(this::refreshState, 100, 1, TimeUnit.MINUTES);
+        pollingJob = scheduler.scheduleWithFixedDelay(this::refreshState, 0, 1, TimeUnit.MINUTES);
         // if (token != null) {
         // updateStatus(ThingStatus.ONLINE);
         // } else {
@@ -223,24 +242,30 @@ public class TwinklyTreeHandler extends BaseThingHandler {
     }
 
     private void refreshState() {
-        try {
-            refreshIfNeeded();
-
-            boolean isOn = isOn();
-            updateState(CHANNEL_SWITCH, isOn ? OnOffType.ON : OnOffType.OFF);
-
-            int brightnessPct = 0;
-            if (isOn) {
-                brightnessPct = getBrightness();
-            }
-            updateState(CHANNEL_DIMMER, new PercentType(brightnessPct));
-        } catch (IOException e) {
-            config.token = null;
-            logger.error("Issue while polling for state ", e);
+        for (Channel channel : this.getThing().getChannels()) {
+            handleCommand(channel.getUID(), RefreshType.REFRESH);
         }
+        /*
+         *
+         * try {
+         * refreshIfNeeded();
+         *
+         * boolean isOn = isOn();
+         * updateState(CHANNEL_SWITCH, isOn ? OnOffType.ON : OnOffType.OFF);
+         *
+         * int brightnessPct = 0;
+         * if (isOn) {
+         * brightnessPct = getBrightness();
+         * }
+         * updateState(CHANNEL_DIMMER, new PercentType(brightnessPct));
+         * } catch (IOException e) {
+         * config.token = null;
+         * logger.error("Issue while polling for state ", e);
+         * }
+         */
     }
 
-    private void login() {
+    private synchronized void login() {
         try {
             config.token = null;
 
@@ -271,7 +296,25 @@ public class TwinklyTreeHandler extends BaseThingHandler {
         return config.tokenExpiryDate.before(new Date());
     }
 
-    private JSONObject sendRequest(URL loginURL, String httpMethod, @Nullable String requestString,
+    private synchronized JSONObject sendRequest(URL loginURL, String httpMethod, @Nullable String requestString,
+            @Nullable String token) throws ProtocolException {
+        JSONObject ret;
+        try {
+            ret = sendRequestWrapped(loginURL, httpMethod, requestString, token);
+        } catch (IOException ex) {
+            logger.debug("Invalid Token, attempting to reconnect");
+            login();
+            try {
+                ret = sendRequestWrapped(loginURL, httpMethod, requestString, config.token);
+            } catch (IOException ex2) {
+                logger.error("Attempt to reconnect failed with an exception: ", ex2);
+                ret = new JSONObject();
+            }
+        }
+        return ret;
+    }
+
+    private synchronized JSONObject sendRequestWrapped(URL loginURL, String httpMethod, @Nullable String requestString,
             @Nullable String token) throws IOException, ProtocolException {
         byte[] out = null;
         HttpURLConnection connection = (HttpURLConnection) loginURL.openConnection();
