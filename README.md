@@ -20,11 +20,12 @@ _You need to manually specify the IP address of the Twinkly controller_
 
 ## Channels
 
-| channel    | type   | description                               |
-|------------|--------|-------------------------------------------|
-| switch     | Switch | Turn the lights on (in movie mode) or off |
-| brightness | Dimmer | Adjust brightness                         |
-| mode       | String | Set current mode                          |
+| channel       | type   | description                               |
+|---------------|--------|-------------------------------------------|
+| switch        | Switch | Turn the lights on (in movie mode) or off |
+| brightness    | Dimmer | Adjust brightness                         |
+| mode          | String | Set current mode                          |
+| currenteffect | Number | Set current effect for effect mode        |
 
 ## Textual configuration example
 
