@@ -11,6 +11,7 @@
 		<channels>
 			<channel id="switch" typeId="switch"/>
 			<channel id="dimmer" typeId="dimmer"/>
+			<channel id="mode" typeId="mode"/>
 		</channels>
 
 		<config-description>
@@ -26,6 +27,22 @@
 		<item-type>Switch</item-type>
 		<label>On/off switch</label>
 		<description>On/off switch</description>
+	</channel-type>
+	<channel-type id="mode">
+		<item-type>String</item-type>
+		<label>Mode selection</label>
+		<description>Mode selection</description>
+		<command>
+			<options>
+				<option value="off">Off</option>
+				<option value="color">Color</option>
+				<option value="demo">Demo</option>
+				<option value="effect">Effect</option>
+				<option value="movie">Movie</option>
+				<option value="playlist">Playlist</option>
+				<option value="rt">Realtime Effect</option>
+			</options>
+		</command>
 	</channel-type>
 	<channel-type id="dimmer">
 		<item-type>Dimmer</item-type>

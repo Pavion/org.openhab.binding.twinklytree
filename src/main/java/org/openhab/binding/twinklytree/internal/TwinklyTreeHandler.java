@@ -34,6 +34,7 @@ import org.eclipse.jdt.annotation.Nullable;
 import org.json.JSONObject;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
+import org.openhab.core.library.types.StringType;
 import org.openhab.core.thing.ChannelUID;
 import org.openhab.core.thing.Thing;
 import org.openhab.core.thing.ThingStatus;
@@ -85,8 +86,7 @@ public class TwinklyTreeHandler extends BaseThingHandler {
                 } else {
                     logger.warn("Unexpected command for Twinkly: {}", command);
                 }
-            }
-            if (CHANNEL_DIMMER.equals(channelUID.getId())) {
+            } else if (CHANNEL_DIMMER.equals(channelUID.getId())) {
                 if (command instanceof RefreshType) {
                     if (isOn()) {
                         updateState(channelUID, new PercentType(getBrightness()));
@@ -97,6 +97,12 @@ public class TwinklyTreeHandler extends BaseThingHandler {
                 }
                 PercentType type = (PercentType) command;
                 setBrightness(type.intValue());
+            } else if (CHANNEL_MODE.equals(channelUID.getId())) {
+                if (command instanceof RefreshType) {
+                    updateState(channelUID, new StringType(getMode()));
+                } else {
+                    setMode(command.toFullString());
+                }
             }
         } catch (IOException e) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
@@ -106,12 +112,15 @@ public class TwinklyTreeHandler extends BaseThingHandler {
         }
     }
 
-    private boolean isOn() throws IOException, ProtocolException, MalformedURLException {
+    private String getMode() throws IOException, ProtocolException, MalformedURLException {
         JSONObject getModeResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/mode"), "GET", null,
                 config.token);
         String mode = getModeResponse.getString("mode");
-        boolean isOn = !"off".equalsIgnoreCase(mode);
-        return isOn;
+        return mode;
+    }
+
+    private boolean isOn() throws IOException, ProtocolException, MalformedURLException {
+        return !"off".equalsIgnoreCase(getMode());
     }
 
     private void setBrightness(int brightness) throws IOException, ProtocolException, MalformedURLException {
@@ -246,7 +255,7 @@ public class TwinklyTreeHandler extends BaseThingHandler {
         if (requestString != null) {
             out = requestString.getBytes(StandardCharsets.UTF_8);
             connection.setRequestProperty("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-            connection.setFixedLengthStreamingMode(out.length);
+            // connection.setFixedLengthStreamingMode(out.length);
             connection.setDoOutput(true);
         }
         connection.setDoInput(true);

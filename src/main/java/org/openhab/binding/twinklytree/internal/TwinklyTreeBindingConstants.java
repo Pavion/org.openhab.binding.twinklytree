@@ -33,4 +33,13 @@ public class TwinklyTreeBindingConstants {
     // List of all Channel ids
     public static final String CHANNEL_SWITCH = "switch";
     public static final String CHANNEL_DIMMER = "dimmer";
+    public static final String CHANNEL_MODE = "mode";
+
+    public static final String MODE_OFF = "off";
+    public static final String MODE_COLOR = "color";
+    public static final String MODE_DEMO = "demo";
+    public static final String MODE_EFFECT = "effect";
+    public static final String MODE_MOVIE = "movie";
+    public static final String MODE_PLAYLIST = "playlist";
+    public static final String MODE_RT = "rt";
 }
