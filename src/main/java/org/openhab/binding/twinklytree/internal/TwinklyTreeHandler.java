@@ -132,6 +132,10 @@ public class TwinklyTreeHandler extends BaseThingHandler {
         }
     }
 
+    private boolean isOn() throws IOException, ProtocolException, MalformedURLException {
+        return !"off".equalsIgnoreCase(getMode());
+    }
+
     private String getMode() throws IOException, ProtocolException, MalformedURLException {
         JSONObject getModeResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/mode"), "GET", null,
                 config.token);
@@ -139,12 +143,13 @@ public class TwinklyTreeHandler extends BaseThingHandler {
         return mode;
     }
 
-    private boolean isOn() throws IOException, ProtocolException, MalformedURLException {
-        return !"off".equalsIgnoreCase(getMode());
+    private void setMode(String newMode) throws IOException, ProtocolException, MalformedURLException {
+        sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/mode"), "POST", "{\"mode\":\"" + newMode + "\"}",
+                config.token);
     }
 
     private void setBrightness(int brightness) throws IOException, ProtocolException, MalformedURLException {
-        JSONObject getModeResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/out/brightness"), "POST",
+        sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/out/brightness"), "POST",
                 "{\"mode\":\"enabled\",\"type\":\"A\",\"value\":" + brightness + "}", config.token);
     }
 
@@ -152,11 +157,6 @@ public class TwinklyTreeHandler extends BaseThingHandler {
         JSONObject getModeResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/out/brightness"), "GET",
                 null, config.token);
         return getModeResponse.getInt("value");
-    }
-
-    private void setMode(String newMode) throws IOException, ProtocolException, MalformedURLException {
-        JSONObject setModeResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/mode"), "POST",
-                "{\"mode\":\"" + newMode + "\"}", config.token);
     }
 
     private int getCurrentEffect() throws IOException, ProtocolException, MalformedURLException {
@@ -170,7 +170,7 @@ public class TwinklyTreeHandler extends BaseThingHandler {
     }
 
     private void setCurrentEffect(int currentEffect) throws IOException, ProtocolException, MalformedURLException {
-        JSONObject response = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/effects/current"), "POST",
+        sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/effects/current"), "POST",
                 "{\"preset_id\":\"" + currentEffect + "\",\"effect_id\":\"" + currentEffect + "\"}", config.token);
     }
 
@@ -181,8 +181,8 @@ public class TwinklyTreeHandler extends BaseThingHandler {
     }
 
     private void setCurrentMovie(int currentMovie) throws IOException, ProtocolException, MalformedURLException {
-        JSONObject response = sendRequest(new URL(config.getBaseURL(), "/xled/v1/movies/current"), "POST",
-                "{\"id\":" + currentMovie + "}", config.token);
+        sendRequest(new URL(config.getBaseURL(), "/xled/v1/movies/current"), "POST", "{\"id\":" + currentMovie + "}",
+                config.token);
     }
 
     private void logout() {
@@ -208,22 +208,8 @@ public class TwinklyTreeHandler extends BaseThingHandler {
         logger.debug("Start initializing!");
         config = getConfigAs(TwinklyTreeConfiguration.class);
 
-        // TODO: Initialize the handler.
-        // The framework requires you to return from this method quickly. Also, before leaving this method a thing
-        // status from one of ONLINE, OFFLINE or UNKNOWN must be set. This might already be the real thing status in
-        // case you can decide it directly.
-        // In case you can not decide the thing status directly (e.g. for long running connection handshake using WAN
-        // access or similar) you should set status UNKNOWN here and then decide the real status asynchronously in the
-        // background.
-
-        // set the thing status to UNKNOWN temporarily and let the background task decide for the real status.
-        // the framework is then able to reuse the resources from the thing handler initialization.
-        // we set this upfront to reliably check status updates in unit tests.
         updateStatus(ThingStatus.UNKNOWN);
 
-        // Example for background initialization:
-        // scheduler.execute(() -> {
-        // login();
         Integer refreshRate = 0;
         if (config.refresh != null) {
             refreshRate = config.refresh;
@@ -232,6 +218,7 @@ public class TwinklyTreeHandler extends BaseThingHandler {
             logger.debug("Starting refresh job with {} refresh rate", refreshRate);
             pollingJob = scheduler.scheduleWithFixedDelay(this::refreshState, 0, refreshRate, TimeUnit.SECONDS);
         }
+
         // if (token != null) {
         // updateStatus(ThingStatus.ONLINE);
         // } else {
@@ -254,24 +241,6 @@ public class TwinklyTreeHandler extends BaseThingHandler {
                 handleCommand(channel.getUID(), RefreshType.REFRESH);
             }
         }
-        /*
-         *
-         * try {
-         * refreshIfNeeded();
-         *
-         * boolean isOn = isOn();
-         * updateState(CHANNEL_SWITCH, isOn ? OnOffType.ON : OnOffType.OFF);
-         *
-         * int brightnessPct = 0;
-         * if (isOn) {
-         * brightnessPct = getBrightness();
-         * }
-         * updateState(CHANNEL_DIMMER, new PercentType(brightnessPct));
-         * } catch (IOException e) {
-         * config.token = null;
-         * logger.error("Issue while polling for state ", e);
-         * }
-         */
     }
 
     private synchronized void login() {
