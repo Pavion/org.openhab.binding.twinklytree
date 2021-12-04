@@ -1,6 +1,6 @@
 # TwinklyTree Binding
 
-_This binding adds native support for the Twinkly christmas LED lights to openHAB. Currently, only on/off is supported as this is the only function that i need right now. But now there is a framework, other features can be implemented as well. I can imagine supporting dimmer functionality to be implemented soon_
+_This binding adds native support for the Twinkly christmas LED lights to openHAB._
 
 ## Supported Things
 
@@ -20,10 +20,22 @@ _You need to manually specify the IP address of the Twinkly controller_
 
 ## Channels
 
-_There currently only is the on/off switch channel_
+| channel    | type   | description                               |
+|------------|--------|-------------------------------------------|
+| switch     | Switch | Turn the lights on (in movie mode) or off |
+| brightness | Dimmer | Adjust brightness                         |
+| mode       | String | Set current mode                          |
 
+## Textual configuration example
 
-| channel  | type   | description                           |
-|----------|--------|---------------------------------------|
-| switch   | Switch | The channel to turn the lights on/off |
+### .things
 
+```
+Thing twinklytree:twinkly:twinklyTree "Twinkly Tree" @ "MyRoom" [ host="192.168.0.2" ]
+```
+
+### .items (with Alexa support)
+
+```
+Switch TwinklyTreeSwitch "Twinkly Tree Switch" { channel="twinklytree:twinkly:twinklyTree:switch", alexa="PowerController.powerState" [friendlyNames="Twinkly My Room"] }
+```
