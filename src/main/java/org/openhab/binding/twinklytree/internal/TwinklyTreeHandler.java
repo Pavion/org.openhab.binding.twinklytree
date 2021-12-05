@@ -267,7 +267,9 @@ public class TwinklyTreeHandler extends BaseThingHandler {
 
     @Override
     public void dispose() {
-        pollingJob.cancel(true);
+        if (pollingJob != null) {
+            pollingJob.cancel(true);
+        }
     }
 
     private boolean isTokenExpired() {
