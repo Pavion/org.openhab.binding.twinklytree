@@ -26,7 +26,7 @@ _To start with the binding, put the jar in the add-ons directory and start addin
 | channel       | type   | description                               |
 |---------------|--------|-------------------------------------------|
 | switch        | Switch | Turn the lights on (in movie mode) or off |
-| brightness    | Dimmer | Adjust brightness                         |
+| dimmer        | Dimmer | Adjust brightness                         |
 | mode          | String | Set current mode                          |
 | currenteffect | Number | Set current effect for effect mode        |
 | currentmovie  | Number | Set current movie for movie mode          |
