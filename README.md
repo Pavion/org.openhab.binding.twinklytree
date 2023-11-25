@@ -1,18 +1,18 @@
 # TwinklyTree Binding
 
-_This binding adds native support for the Twinkly christmas LED lights to openHAB._
+This binding adds native support for the Twinkly christmas LED lights to openHAB.
 
 ## Supported Things
 
-_The binding supports the xled API as is described in https://xled-docs.readthedocs.io/en/latest/rest_api.html . It has been tested with the 250 led Twinkly gen II_
+The binding supports the xled API as is described in https://xled-docs.readthedocs.io/en/latest/rest_api.html . It has been tested with the 250 led Twinkly gen II
 
 ## Discovery
 
-_Auto discovery is not implemented yet, so you need to provide the IP address or hostname of the Twinkly controller when adding the Thing_
+Auto discovery is not implemented yet, so you need to provide the IP address or hostname of the Twinkly controller when adding the Thing
 
 ## Binding Configuration
 
-_To start with the binding, put the jar in the add-ons directory and start adding the Thing_
+To start with the binding, put the jar in the add-ons directory and start adding the Thing
 
 ## Thing Configuration
 
@@ -29,6 +29,7 @@ _To start with the binding, put the jar in the add-ons directory and start addin
 | dimmer        | Dimmer | Adjust brightness                         |
 | mode          | String | Set current mode                          |
 | currenteffect | Number | Set current effect for effect mode        |
+| color         | Number | Set color for color mode                  |
 | currentmovie  | Number | Set current movie for movie mode          |
 
 ## Textual configuration example
