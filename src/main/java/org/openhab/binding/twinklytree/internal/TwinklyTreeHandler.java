@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2010-2022 Contributors to the openHAB project
+ * Copyright (c) 2010-2023 Contributors to the openHAB project
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information.
@@ -248,7 +248,8 @@ public class TwinklyTreeHandler extends BaseThingHandler {
             config.token = null;
 
             JSONObject loginResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/login"), "POST",
-                    "{\"challenge\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"}", null);
+                    "{\"challenge\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"}", null,
+                    false);
             String unverifiedToken = loginResponse.getString("authentication_token");
             String challengeResponse = loginResponse.getString("challenge-response");
             Long tokenExpiresIn = loginResponse.getLong("authentication_token_expires_in");
@@ -256,7 +257,7 @@ public class TwinklyTreeHandler extends BaseThingHandler {
             logger.debug("Twinkly sent login token {} with challenge {}", unverifiedToken, challengeResponse);
 
             JSONObject verifyResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/verify"), "POST",
-                    "{\"challenge-response\":\"" + challengeResponse + "\"}", unverifiedToken);
+                    "{\"challenge-response\":\"" + challengeResponse + "\"}", unverifiedToken, false);
             config.token = unverifiedToken;
             config.tokenExpiryDate = new Date(System.currentTimeMillis() + (tokenExpiresIn.longValue() * 1000));
             updateStatus(ThingStatus.ONLINE);
@@ -278,12 +279,19 @@ public class TwinklyTreeHandler extends BaseThingHandler {
 
     private synchronized JSONObject sendRequest(URL loginURL, String httpMethod, @Nullable String requestString,
             @Nullable String token) throws ProtocolException {
+        return sendRequest(loginURL, httpMethod, requestString, token, true);
+    }
+
+    private synchronized JSONObject sendRequest(URL loginURL, String httpMethod, @Nullable String requestString,
+            @Nullable String token, boolean reconnectEnabled) throws ProtocolException {
         JSONObject ret;
         try {
             ret = sendRequestWrapped(loginURL, httpMethod, requestString, token);
         } catch (IOException ex) {
             logger.debug("Invalid Token, attempting to reconnect");
-            login();
+            if (reconnectEnabled) {
+                login();
+            }
             try {
                 ret = sendRequestWrapped(loginURL, httpMethod, requestString, config.token);
             } catch (IOException ex2) {
