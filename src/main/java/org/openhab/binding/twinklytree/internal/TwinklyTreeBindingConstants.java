@@ -36,6 +36,7 @@ public class TwinklyTreeBindingConstants {
     public static final String CHANNEL_MODE = "mode";
     public static final String CHANNEL_CURRENT_EFFECT = "currenteffect";
     public static final String CHANNEL_CURRENT_MOVIE = "currentmovie";
+    public static final String CHANNEL_COLOR = "color";
 
     public static final String MODE_OFF = "off";
     public static final String MODE_COLOR = "color";

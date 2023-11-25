@@ -14,6 +14,7 @@
 			<channel id="mode" typeId="mode"/>
 			<channel id="currenteffect" typeId="currenteffect"/>
 			<channel id="currentmovie" typeId="currentmovie"/>
+			<channel id="color" typeId="color"/>
 		</channels>
 
 		<config-description>
@@ -66,5 +67,10 @@
 		<item-type>Number</item-type>
 		<label>Current Movie</label>
 		<description>Current movie in movie mode</description>
+	</channel-type>
+	<channel-type id="color">
+		<item-type>Color</item-type>
+		<label>LED Color</label>
+		<description>Current color in color mode</description>
 	</channel-type>
 </thing:thing-descriptions>

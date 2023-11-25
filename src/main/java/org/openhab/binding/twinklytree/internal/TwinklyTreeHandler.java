@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -33,6 +34,7 @@ import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
 import org.json.JSONObject;
 import org.openhab.core.library.types.DecimalType;
+import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.OnOffType;
 import org.openhab.core.library.types.PercentType;
 import org.openhab.core.library.types.StringType;
@@ -123,6 +125,14 @@ public class TwinklyTreeHandler extends BaseThingHandler {
                         setCurrentMovie(type.intValue());
                     }
                     break;
+                case CHANNEL_COLOR:
+                    if (command instanceof RefreshType) {
+                        updateState(channelUID, getColor());
+                    } else {
+                        HSBType color = (HSBType) command;
+                        setColor(color);
+                    }
+                    break;
             }
         } catch (IOException e) {
             updateStatus(ThingStatus.OFFLINE, ThingStatusDetail.COMMUNICATION_ERROR,
@@ -134,6 +144,22 @@ public class TwinklyTreeHandler extends BaseThingHandler {
 
     private boolean isOn() throws IOException, ProtocolException, MalformedURLException {
         return !"off".equalsIgnoreCase(getMode());
+    }
+
+    private HSBType getColor() throws IOException, ProtocolException, MalformedURLException {
+        JSONObject response = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/color"), "GET", null,
+                config.token);
+        return new HSBType(new DecimalType(response.getInt("hue")),
+                new PercentType(new BigDecimal((response.getInt("saturation")) / 2.55)),
+                new PercentType(new BigDecimal((response.getInt("value")) / 2.55)));
+    }
+
+    private void setColor(HSBType color) throws IOException, ProtocolException, MalformedURLException {
+        sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/color"), "POST",
+                "{\"hue\":" + color.getHue().intValue() + ",\"saturation\":"
+                        + Math.round(color.getSaturation().floatValue() * 2.55) + ",\"value\":"
+                        + Math.round(color.getBrightness().floatValue() * 2.55) + "}",
+                config.token);
     }
 
     private String getMode() throws IOException, ProtocolException, MalformedURLException {
