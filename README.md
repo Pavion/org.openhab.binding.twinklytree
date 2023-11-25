@@ -29,8 +29,8 @@ To start with the binding, put the jar in the add-ons directory and start adding
 | dimmer        | Dimmer | Adjust brightness                         |
 | mode          | String | Set current mode                          |
 | currenteffect | Number | Set current effect for effect mode        |
-| color         | Number | Set color for color mode                  |
 | currentmovie  | Number | Set current movie for movie mode          |
+| color         | Color  | Set color for color mode                  |
 
 ## Textual configuration example
 
