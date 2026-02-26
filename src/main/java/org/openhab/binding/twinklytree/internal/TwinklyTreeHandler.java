@@ -32,7 +32,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.eclipse.jdt.annotation.NonNullByDefault;
 import org.eclipse.jdt.annotation.Nullable;
-import org.json.JSONObject;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.openhab.core.library.types.DecimalType;
 import org.openhab.core.library.types.HSBType;
 import org.openhab.core.library.types.OnOffType;
@@ -147,11 +148,11 @@ public class TwinklyTreeHandler extends BaseThingHandler {
     }
 
     private HSBType getColor() throws IOException, ProtocolException, MalformedURLException {
-        JSONObject response = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/color"), "GET", null,
+        JsonObject response = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/color"), "GET", null,
                 config.token);
-        return new HSBType(new DecimalType(response.getInt("hue")),
-                new PercentType(new BigDecimal((response.getInt("saturation")) / 2.55)),
-                new PercentType(new BigDecimal((response.getInt("value")) / 2.55)));
+        return new HSBType(new DecimalType(response.get("hue").getAsInt()),
+                new PercentType(new BigDecimal((response.get("saturation").getAsInt()) / 2.55)),
+                new PercentType(new BigDecimal((response.get("value").getAsInt()) / 2.55)));
     }
 
     private void setColor(HSBType color) throws IOException, ProtocolException, MalformedURLException {
@@ -163,9 +164,9 @@ public class TwinklyTreeHandler extends BaseThingHandler {
     }
 
     private String getMode() throws IOException, ProtocolException, MalformedURLException {
-        JSONObject getModeResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/mode"), "GET", null,
+        JsonObject getModeResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/mode"), "GET", null,
                 config.token);
-        String mode = getModeResponse.getString("mode");
+        String mode = getModeResponse.get("mode").getAsString();
         return mode;
     }
 
@@ -180,18 +181,18 @@ public class TwinklyTreeHandler extends BaseThingHandler {
     }
 
     private int getBrightness() throws IOException, ProtocolException, MalformedURLException {
-        JSONObject getModeResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/out/brightness"), "GET",
+        JsonObject getModeResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/out/brightness"), "GET",
                 null, config.token);
-        return getModeResponse.getInt("value");
+        return getModeResponse.get("value").getAsInt();
     }
 
     private int getCurrentEffect() throws IOException, ProtocolException, MalformedURLException {
-        JSONObject response = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/effects/current"), "GET", null,
+        JsonObject response = sendRequest(new URL(config.getBaseURL(), "/xled/v1/led/effects/current"), "GET", null,
                 config.token);
         if (response.has("preset_id")) {
-            return response.getInt("preset_id");
+            return response.get("preset_id").getAsInt();
         } else {
-            return response.getInt("effect_id");
+            return response.get("effect_id").getAsInt();
         }
     }
 
@@ -201,9 +202,9 @@ public class TwinklyTreeHandler extends BaseThingHandler {
     }
 
     private int getCurrentMovie() throws IOException, ProtocolException, MalformedURLException {
-        JSONObject response = sendRequest(new URL(config.getBaseURL(), "/xled/v1/movies/current"), "GET", null,
+        JsonObject response = sendRequest(new URL(config.getBaseURL(), "/xled/v1/movies/current"), "GET", null,
                 config.token);
-        return response.getInt("id");
+        return response.get("id").getAsInt();
     }
 
     private void setCurrentMovie(int currentMovie) throws IOException, ProtocolException, MalformedURLException {
@@ -273,16 +274,16 @@ public class TwinklyTreeHandler extends BaseThingHandler {
         try {
             config.token = null;
 
-            JSONObject loginResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/login"), "POST",
+            JsonObject loginResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/login"), "POST",
                     "{\"challenge\":\"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\"}", null,
                     false);
-            String unverifiedToken = loginResponse.getString("authentication_token");
-            String challengeResponse = loginResponse.getString("challenge-response");
-            Long tokenExpiresIn = loginResponse.getLong("authentication_token_expires_in");
+            String unverifiedToken = loginResponse.get("authentication_token").getAsString();
+            String challengeResponse = loginResponse.get("challenge-response").getAsString();
+            Long tokenExpiresIn = loginResponse.get("authentication_token_expires_in").getAsLong();
 
             logger.debug("Twinkly sent login token {} with challenge {}", unverifiedToken, challengeResponse);
 
-            JSONObject verifyResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/verify"), "POST",
+            JsonObject verifyResponse = sendRequest(new URL(config.getBaseURL(), "/xled/v1/verify"), "POST",
                     "{\"challenge-response\":\"" + challengeResponse + "\"}", unverifiedToken, false);
             config.token = unverifiedToken;
             config.tokenExpiryDate = new Date(System.currentTimeMillis() + (tokenExpiresIn.longValue() * 1000));
@@ -303,14 +304,14 @@ public class TwinklyTreeHandler extends BaseThingHandler {
         return config.tokenExpiryDate.before(new Date());
     }
 
-    private synchronized JSONObject sendRequest(URL loginURL, String httpMethod, @Nullable String requestString,
+    private synchronized JsonObject sendRequest(URL loginURL, String httpMethod, @Nullable String requestString,
             @Nullable String token) throws ProtocolException {
         return sendRequest(loginURL, httpMethod, requestString, token, true);
     }
 
-    private synchronized JSONObject sendRequest(URL loginURL, String httpMethod, @Nullable String requestString,
+    private synchronized JsonObject sendRequest(URL loginURL, String httpMethod, @Nullable String requestString,
             @Nullable String token, boolean reconnectEnabled) throws ProtocolException {
-        JSONObject ret;
+        JsonObject ret;
         try {
             ret = sendRequestWrapped(loginURL, httpMethod, requestString, token);
         } catch (IOException ex) {
@@ -322,13 +323,13 @@ public class TwinklyTreeHandler extends BaseThingHandler {
                 ret = sendRequestWrapped(loginURL, httpMethod, requestString, config.token);
             } catch (IOException ex2) {
                 logger.error("Attempt to reconnect failed with an exception: ", ex2);
-                ret = new JSONObject();
+                ret = new JsonObject();
             }
         }
         return ret;
     }
 
-    private synchronized JSONObject sendRequestWrapped(URL loginURL, String httpMethod, @Nullable String requestString,
+    private synchronized JsonObject sendRequestWrapped(URL loginURL, String httpMethod, @Nullable String requestString,
             @Nullable String token) throws IOException, ProtocolException {
         byte[] out = null;
         HttpURLConnection connection = (HttpURLConnection) loginURL.openConnection();
@@ -364,7 +365,7 @@ public class TwinklyTreeHandler extends BaseThingHandler {
             logger.debug("Request {} {} {} got response headers {} with data {} ", httpMethod, loginURL, requestString,
                     connection.getHeaderFields(), textBuilder);
         }
-        JSONObject loginResponse = new JSONObject(textBuilder.toString());
+        JsonObject loginResponse = JsonParser.parseString(textBuilder.toString()).getAsJsonObject();
         return loginResponse;
     }
 }

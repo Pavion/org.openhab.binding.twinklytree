@@ -3,9 +3,7 @@
     <feature version="0.0.0">
         <feature>openhab-runtime-base</feature>
         <feature>wrap</feature>
-        <bundle>mvn:org.json/json/20180813</bundle>
         <bundle>mvn:org.openhab.addons.bundles/org.openhab.binding.twinklytree/5.2.0-SNAPSHOT</bundle>
-        <bundle>mvn:org.slf4j/slf4j-api/2.0.0</bundle>
         <bundle>wrap:mvn:org.lastnpe.eea/eea-all/2.4.0</bundle>
     </feature>
 </features>
