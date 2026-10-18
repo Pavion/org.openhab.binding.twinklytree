@@ -4,7 +4,7 @@ This binding adds native support for the Twinkly christmas LED lights to openHAB
 
 ## Supported Things
 
-The binding supports the xled API as is described in https://xled-docs.readthedocs.io/en/latest/rest_api.html . It has been tested with the 250 led Twinkly gen II
+The binding supports the xled API as is described in <https://xled-docs.readthedocs.io/en/latest/rest_api.html>. It has been tested with the 250 led Twinkly gen II
 
 ## Discovery
 
@@ -36,12 +36,12 @@ To start with the binding, put the jar in the add-ons directory and start adding
 
 ### .things
 
-```
+```DSL
 Thing twinklytree:twinkly:twinklyTree "Twinkly Tree" @ "MyRoom" [ host="192.168.0.2", refresh="60" ]
 ```
 
 ### .items (with Alexa support)
 
-```
+```DSL
 Switch TwinklyTreeSwitch "Twinkly Tree Switch" { channel="twinklytree:twinkly:twinklyTree:switch", alexa="PowerController.powerState" [friendlyNames="Twinkly My Room"] }
 ```
